@@ -22,13 +22,16 @@ public class MainActivity extends ActionBarActivity  {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
+		//inflate activity_main, but everything is in fragment_main
 		
 		if (savedInstanceState == null) {
 			getSupportFragmentManager().beginTransaction()
 					.add(R.id.container, new PlaceholderFragment()).commit();
 		}
 		
+		//If your main class extends ActionBarActivity and has a PlaceholderFragment
+		//leave this place blank and move to work in PlaceholderFragment class
+		//You can also move type PlaceholderFragment to a new file
 			  
 	}
 	

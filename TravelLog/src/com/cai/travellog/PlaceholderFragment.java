@@ -18,9 +18,13 @@ public class PlaceholderFragment extends Fragment {
 	public PlaceholderFragment() {
 	}
 
+	//Get a handle of GoogleMap
 	private void setUpMapIfNeeded() {
+		
 	    // Do a null check to confirm that we have not already instantiated the map.
 	    if (mMap == null) {
+	    	
+	    	//Type has to be SupportMapFragment
 	        mMap = ((SupportMapFragment) getFragmentManager().findFragmentById(R.id.map))
 	                            .getMap();
 	        
@@ -33,12 +37,13 @@ public class PlaceholderFragment extends Fragment {
 	    }
 	}
 	
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View rootView = inflater.inflate(R.layout.fragment_main, container,
 				false);
-		
+		//Call method to get a handle of map
 		setUpMapIfNeeded();
 		return rootView;
 	}
