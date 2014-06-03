@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -12,6 +13,8 @@ import com.amap.api.location.AMapLocationListener;
 import com.amap.api.location.LocationManagerProxy;
 import com.amap.api.location.LocationProviderProxy;
 import com.amap.api.maps.AMap;
+import com.amap.api.maps.AMap.OnMyLocationChangeListener;
+import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.UiSettings;
@@ -30,14 +33,18 @@ AMapLocationListener{
 	private OnLocationChangedListener mListener;
 	private LocationManagerProxy mAMapLocationManager;
 	private Marker marker;
-  
+	public boolean first = true;
+	public final static String TAG = "debug msg";
+	
+	
     @Override  
     protected void onCreate(Bundle savedInstanceState) {  
         super.onCreate(savedInstanceState);  
         // R 需要引用包import com.amapv2.apis.R;  
         setContentView(R.layout.activity_main_map);  
         mapView = (MapView) findViewById(R.id.map);  
-        mapView.onCreate(savedInstanceState);// 必须要写  
+        mapView.onCreate(savedInstanceState);// 必须要写
+        Log.i(TAG,"debugging started.");
         init();  
     }  
   
@@ -66,7 +73,10 @@ AMapLocationListener{
 		// myLocationStyle.anchor(int,int)//设置小蓝点的锚点
 		myLocationStyle.strokeWidth(0.1f);// 设置圆形的边框粗细
 		aMap.setMyLocationStyle(myLocationStyle);
+		
 		aMap.setMyLocationRotateAngle(180);
+		
+		
 		aMap.setLocationSource(this);// 设置定位监听
 		aMap.getUiSettings().setScrollGesturesEnabled(false);//disable gesture scroll
 		aMap.setMyLocationEnabled(true);// 设置为true表示显示定位层并可触发定位，false表示隐藏定位层并不可触发定位，默认是false
@@ -160,7 +170,16 @@ AMapLocationListener{
 	 */
 	@Override
 	public void onLocationChanged(AMapLocation aLocation) {
+		
 		if (mListener != null && aLocation != null) {
+			if (first){
+				//aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLatLng,12));
+				Log.i(TAG,"camera animation");
+				aMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(aLocation.getLatitude()
+						, aLocation.getLongitude()),15),2000,null);
+				first=false;
+			}
+			
 			mListener.onLocationChanged(aLocation);// 显示系统小蓝点
 			marker.setPosition(new LatLng(aLocation.getLatitude(), aLocation
 					.getLongitude()));// 定位雷达小图标
