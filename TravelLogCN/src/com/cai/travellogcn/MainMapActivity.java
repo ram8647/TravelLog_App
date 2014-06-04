@@ -22,6 +22,7 @@ import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MyLocationStyle;
+import com.amap.api.maps.model.PolylineOptions;
 
 
 
@@ -33,8 +34,10 @@ AMapLocationListener{
 	private OnLocationChangedListener mListener;
 	private LocationManagerProxy mAMapLocationManager;
 	private Marker marker;
+	private LatLng point1;
+	private LatLng point2;  //used for drawing polyline
 	public boolean first = true;
-	public final static String TAG = "debug msg";
+	public final static String TAG = "activity message";
 	
 	
     @Override  
@@ -74,14 +77,53 @@ AMapLocationListener{
 		myLocationStyle.strokeWidth(0.1f);// 设置圆形的边框粗细
 		aMap.setMyLocationStyle(myLocationStyle);
 		
-		aMap.setMyLocationRotateAngle(180);
-		
-		
 		aMap.setLocationSource(this);// 设置定位监听
 		aMap.getUiSettings().setScrollGesturesEnabled(false);//disable gesture scroll
+		
+		aMap.setOnMyLocationChangeListener(new OnMyLocationChangeListener(){
+			
+			@Override
+			public void onMyLocationChange(Location arg0) {
+				// TODO Auto-generated method stub
+				drawLines(arg0);
+				Log.i(TAG, "location change listener here.");
+				
+			}
+			
+		});
 		aMap.setMyLocationEnabled(true);// 设置为true表示显示定位层并可触发定位，false表示隐藏定位层并不可触发定位，默认是false
+		
 	}
-
+	
+	private void drawLines(Location aLocation){
+		//alternatively draw point1 and point2
+		
+			Log.i(TAG,"start mapping lines");
+			point1 = new LatLng(aLocation.getLatitude(),aLocation.getLongitude());
+			
+			Log.i(TAG,"point1 location ("+point1.latitude+","+point1.longitude+")");
+			if (point2 == null){
+				Log.i(TAG,"Point2 is null.");
+				point2 = new LatLng(aLocation.getLatitude(),aLocation.getLongitude());
+			}
+			Log.i(TAG,"point2 location ("+point2.latitude+","+point2.longitude+")");
+			
+			
+			//draw line from point2 to point1
+			if ((point1 != null) && (point2 != null) && (!first)){
+				Log.i(TAG, "draw line from point2 to point1");
+				aMap.addPolyline((new PolylineOptions())
+						.add(point2, point1)
+						.width(10).setDottedLine(true).geodesic(true)
+						.color(Color.argb(255, 1, 1, 1)));
+			}
+			point2 = new LatLng(point1.latitude, point1.longitude);
+			
+		
+			
+		
+		
+	}
     
   
     /** 
@@ -172,17 +214,25 @@ AMapLocationListener{
 	public void onLocationChanged(AMapLocation aLocation) {
 		
 		if (mListener != null && aLocation != null) {
+
 			if (first){
-				//aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLatLng,12));
-				Log.i(TAG,"camera animation");
 				aMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(aLocation.getLatitude()
-						, aLocation.getLongitude()),15),2000,null);
-				first=false;
+						, aLocation.getLongitude()),18));
+				first = false;
 			}
+			//aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLatLng,12));
+			Log.i(TAG,"camera animation");
+			aMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(aLocation.getLatitude()
+					, aLocation.getLongitude())));
+			//animation duration is 2000 ms, zoom level=15.
+
+			
 			
 			mListener.onLocationChanged(aLocation);// 显示系统小蓝点
-			marker.setPosition(new LatLng(aLocation.getLatitude(), aLocation
-					.getLongitude()));// 定位雷达小图标
+			drawLines(aLocation);
+			
+			
+			
 			float bearing = aMap.getCameraPosition().bearing;
 			aMap.setMyLocationRotateAngle(bearing);// 设置小蓝点旋转角度
 		}
